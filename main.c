@@ -5,6 +5,8 @@
 #include <conio.h> 
 #include <time.h>
 #include <ctype.h>
+#include <mmsystem.h>
+#pragma comment(lib,"winmm.lib")
 
 //Constants
 #define red "red";
@@ -22,34 +24,35 @@
 /*Functions*/
 /*---------------------------------*/
 //Main
-int start();
-int set_rows_main();
-int start_check_s();
+int start(void);
+int set_rows_main(void);
+int start_check_s(void);
 
 //Game Play
-int game_play();
+int game_play(void);
 
 //Setting
-int gotomain();
-int setting();
-int set_rows_setting();
-int setting_s();
-int setting_r();
-int setting_w();
-int change_setting();
-int setting_save();
+int gotomain(void);
+int setting(void);
+int set_rows_setting(void);
+int setting_s(void);
+int setting_r(void);
+int setting_w(void);
+int change_setting(void);
+int setting_save(void);
 
 //Quit
-int quit_game();
+int quit_game(void);
 
 //Thread
-int start_work_thread();
+int start_work_thread(void);
 DWORD WINAPI print(LPVOID);
 DWORD WINAPI get_arrow(LPVOID);
+DWORD WINAPI music(LPVOID);
 
 //Public
-int reset_rows();
-int reset_setting_variables();
+int reset_rows(void);
+int reset_setting_variables(void);
 int setting_color(char *st);
 int color(int c_t, int c_b);
 /*---------------------------------*/
@@ -88,7 +91,7 @@ struct set_ch {
 FILE* options;
 /*---------------------------------*/
 
-int reset_rows() {
+int reset_rows(void) {
     for(int i = 0; i < 15; i++) {
         for(int j = 0; j < 70; j++) {
             display[i][j] = ' ';
@@ -96,7 +99,7 @@ int reset_rows() {
     }
 }
 
-int reset_setting_variables() {
+int reset_setting_variables(void) {
     strcpy(ch.s1, " ");
     strcpy(ch.s2, " ");
     strcpy(ch.s3, " ");
@@ -173,11 +176,12 @@ int color(int c_t, int c_b) {
     return 0;
 }
 
-void main() {
+void main(void) {
+    // PlaySound('C:\\Users\\Kyu Wan KIM\\Desktop\\Visual Studio\\projects\\C\\Snake\\Back.wav', NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
     start();
 }
 
-int start() {
+int start(void) {
     display_type = 1;
     system("title Snake Game - by Lemon");
     system("mode con:cols=70 lines=16");
@@ -190,7 +194,7 @@ int start() {
     start_work_thread();
 }
 
-int set_rows_main() {
+int set_rows_main(void) {
     display[0][30] = 'S';
     display[0][31] = 'N';
     display[0][32] = 'A';
@@ -285,7 +289,7 @@ int set_rows_main() {
     display[14][41] = 'n';
 }
 
-int start_check_s() {
+int start_check_s(void) {
     if (start_check == 1) {
         for (int i = 22; i < 33; i++) {
             display[3][i] = '*';
@@ -330,7 +334,7 @@ int start_check_s() {
     }
 }
 
-int start_work_thread() {
+int start_work_thread(void) {
     HANDLE print_t;
     DWORD threadId1;
     int i_t;
@@ -341,8 +345,23 @@ int start_work_thread() {
     int j_t;
     get_arrow_t = CreateThread(NULL, 0, get_arrow, (LPVOID)j_t, 0, &threadId2);
     if (get_arrow_t) CloseHandle(get_arrow_t);
+    HANDLE music_t;
+    DWORD threadId3;
+    int k_t;
+    music_t = CreateThread(NULL, 0, music, (LPVOID)k_t, 0, &threadId3);
+    if (music_t) CloseHandle(music_t);
     while(1) Sleep(1000);
     return EXIT_SUCCESS;
+}
+
+DWORD WINAPI music(LPVOID n) {
+    // char *t = "True";
+    // int eq = strcmp(set.sound_effect, t);
+    // if (eq == 0) {
+    //     while(1) {
+    //         PlaySound('Back.wav', NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+    //     }
+    // }
 }
 
 DWORD WINAPI print(LPVOID n) {
@@ -803,11 +822,31 @@ DWORD WINAPI get_arrow(LPVOID n) {
     }
 }
 
-int game_play() {
+int game_play(void) {
+    reset_rows();
+    for(int i = 1; i < 59; i++) {
+        display[0][i] = '-';
+        display[14][i] = '-';
+    }
+    for(int i = 1; i < 14; i++) {
+        display[i][0] = '|';
+        display[i][59] = '|';
+    }
+    display[2][62] = 'S';
+    display[2][63] = 'C';
+    display[2][64] = 'O';
+    display[2][65] = 'R';
+    display[2][66] = 'E';
+    display[3][62] = '3';
+    display[3][63] = '2';
+    display[3][64] = '5';
 
+    display[5][62] = 'V';
+    display[5][64] = 'V';
+    display[5][66] = 'V';
 }
 
-int gotomain() {
+int gotomain(void) {
     display_type = 1;
     start_check = 2;
     setting_n = 0;
@@ -815,7 +854,7 @@ int gotomain() {
     start_check_s();
 }
 
-int setting() {
+int setting(void) {
     display_type = 3;
     reset_rows();
     set_rows_setting();
@@ -968,7 +1007,7 @@ int setting() {
     }
 }
 
-int setting_s() {
+int setting_s(void) {
     if (setting_n == 1) {
         for (int i = 27; i < 43; i++) display[10][i] = ' ';
         for (int i = 27; i < 43; i++) display[12][i] = ' ';
@@ -1025,7 +1064,7 @@ int setting_s() {
     }
 }
 
-int setting_r() {
+int setting_r(void) {
     options = fopen("setting.txt", "r");
     fscanf(options, "%s %s %s %s %s %s %s %s %s %s %s %s %s", &ch.s1, &ch.s2, &ch.s3, &ch.s4, &ch.s5, &ch.s6, &ch.s7, &ch.s8, &ch.s9, &ch.s10, &ch.s11);
     fclose(options);
@@ -1036,7 +1075,7 @@ int setting_r() {
     strcpy(set.auto_screen, ch.s11);
 }
 
-int set_rows_setting() {
+int set_rows_setting(void) {
     display[0][31] = 'S';
     display[0][32] = 'E';
     display[0][33] = 'T';
@@ -1153,13 +1192,13 @@ int set_rows_setting() {
     for(int i = 27; i < 43; i++) display[13][i] = '-';
 }
 
-int setting_w() {
+int setting_w(void) {
     options = fopen("setting.txt", "wt");
     fprintf(options, "%s\n\n%s %s\n\n%s %s\n\n%s %s\n\n%s %s\n\n%s %s", ch.s1, ch.s2, set.sound_effect, ch.s4, set.back_music, ch.s6, set.back_color, ch.s8, set.letter_color, ch.s10, set.auto_screen);
     fclose(options);
 }
 
-int change_setting() {
+int change_setting(void) {
     int bc = setting_color(set.back_color);
     int c_t = 0;
     int c_b = 0;
@@ -1210,13 +1249,13 @@ int change_setting() {
     color(c_t, c_b);
 }
 
-int setting_save() {
+int setting_save(void) {
     reset_rows();
     change_setting();
     setting_w();
     reset_setting_variables();
 }
 
-int quit_game() {
+int quit_game(void) {
     exit(1);
 }
